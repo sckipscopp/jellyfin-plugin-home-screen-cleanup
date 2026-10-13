@@ -1,0 +1,41 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
+    ignore:
+      # Jellyfin.* defines the plugin ABI (targetAbi). Any bump is a deliberate manual change.
+      - dependency-name: "Jellyfin.*"
+    groups:
+      analyzers:
+        patterns:
+          - "StyleCop.Analyzers"
+          - "SerilogAnalyzer"
+          - "SmartAnalyzers.*"
+      test:
+        patterns:
+          - "xunit*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "dotnet-sdk"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 3

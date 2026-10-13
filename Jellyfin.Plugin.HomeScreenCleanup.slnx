@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Jellyfin.Plugin.HomeScreenCleanup/Jellyfin.Plugin.HomeScreenCleanup.csproj" />
+  <Project Path="tests/Jellyfin.Plugin.HomeScreenCleanup.Tests/Jellyfin.Plugin.HomeScreenCleanup.Tests.csproj" />
+</Solution>

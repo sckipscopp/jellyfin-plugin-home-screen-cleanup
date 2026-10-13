@@ -1,0 +1,105 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{json,yml,yaml,props,targets,csproj,slnx,config,xml,html,css}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.ps1]
+end_of_line = crlf
+
+[*.cs]
+# ---- Layout / usings ----------------------------------------------------------------------
+csharp_using_directive_placement = outside_namespace:suggestion
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_new_line_before_open_brace = all
+csharp_prefer_braces = true:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_readonly_field = true:suggestion
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+
+# ---- Naming: private fields are _camelCase ------------------------------------------------
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, private_protected
+dotnet_naming_symbols.private_static_readonly.applicable_kinds = field
+dotnet_naming_symbols.private_static_readonly.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_readonly.required_modifiers = static, readonly
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.pascal.capitalization = pascal_case
+
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_rule.constants_pascal.severity = suggestion
+dotnet_naming_rule.static_readonly_pascal.symbols = private_static_readonly
+dotnet_naming_rule.static_readonly_pascal.style = pascal
+dotnet_naming_rule.static_readonly_pascal.severity = suggestion
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_rule.private_fields_underscore.severity = suggestion
+
+# ---- StyleCop tuning ----------------------------------------------------------------------
+# File header boilerplate not used.
+dotnet_diagnostic.SA1633.severity = none
+# No `this.` prefix; private fields use _camelCase instead.
+dotnet_diagnostic.SA1101.severity = none
+dotnet_diagnostic.SA1309.severity = none
+# Usings go outside the (file-scoped) namespace.
+dotnet_diagnostic.SA1200.severity = none
+# Trailing commas in multi-line initializers are optional.
+dotnet_diagnostic.SA1413.severity = none
+# Doc-comment wording rules ("Gets or sets...", "Initializes a new instance...") are noise.
+dotnet_diagnostic.SA1623.severity = none
+dotnet_diagnostic.SA1642.severity = none
+# Multi-line parameters, comment spacing, arithmetic precedence parentheses.
+dotnet_diagnostic.SA1118.severity = none
+dotnet_diagnostic.SA1515.severity = none
+dotnet_diagnostic.SA1512.severity = none
+dotnet_diagnostic.SA1407.severity = none
+# SA1611 / SA1615 (document params / return values) stay enabled.
+
+# ---- .NET analyzer tuning -----------------------------------------------------------------
+# Not a CLS library.
+dotnet_diagnostic.CA1014.severity = none
+# Nullable reference types cover public-argument null checks.
+dotnet_diagnostic.CA1062.severity = none
+# CA1848 (use LoggerMessage) stays ON: all logging goes through [LoggerMessage] partials in Log.cs.
+
+[tests/**.cs]
+# Test code: no XML docs, underscores in test names, no ConfigureAwait, inline arrays, xunit
+# instantiates classes via reflection, member ordering free, test project is an exe (xunit.v3)
+# so public test classes are required.
+dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1602.severity = none
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1812.severity = none
+dotnet_diagnostic.SA1204.severity = none
+dotnet_diagnostic.CA1515.severity = none
+
+# Jellyfin plugin convention: the entry type is named Plugin (template and every official plugin); it
+# shares a name with the Jellyfin.Plugin namespace by design.
+[src/**.cs]
+dotnet_diagnostic.CA1724.severity = none

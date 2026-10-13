@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!-- Home Screen Cleanup - Jellyfin plugin configuration page. SPDX-License-Identifier: GPL-3.0-only -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home Screen Cleanup</title>
+</head>
+<body>
+    <div id="HomeScreenCleanupConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <div class="verticalSection">
+                    <h2 class="sectionTitle">Home Screen Cleanup</h2>
+                    <p class="fieldDescription">
+                        Adds "Remove from Continue Watching" and "Remove from Next Up" to the "..." menu of cards in those two
+                        home-screen rows of the web client. Removing from Continue Watching resets the saved playback position
+                        of the item (and all of its versions) to the start; its played state, play count and last-played date
+                        are not changed. Because of that, a reset episode can afterwards appear in Next Up. Removing from Next Up
+                        hides the whole series from that user's Next Up list on every client until it is unhidden here or, if
+                        enabled, until the user plays an episode of that series again.
+                    </p>
+                </div>
+
+                <form id="HomeScreenCleanupConfigForm">
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="EnableScriptInjection" name="EnableScriptInjection" type="checkbox" is="emby-checkbox" />
+                            <span>Load the menu script in the web client</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            Adds the plugin's script to the web client page. Turn off to remove the menu entries from the web client
+                            entirely; the Next Up filter keeps working. Takes effect when the web client is reloaded.
+                        </div>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="AutoUnhideOnPlayback" name="AutoUnhideOnPlayback" type="checkbox" is="emby-checkbox" />
+                            <span>Unhide a series when the user plays one of its episodes</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            When a user starts playing any episode of a series they hid from Next Up, the series is unhidden for that user.
+                        </div>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="EnableContinueWatchingAction" name="EnableContinueWatchingAction" type="checkbox" is="emby-checkbox" />
+                            <span>Show "Remove from Continue Watching"</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            Offers the entry on Continue Watching cards. It resets the playback position to zero; the item may then show up in Next Up.
+                        </div>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="EnableNextUpAction" name="EnableNextUpAction" type="checkbox" is="emby-checkbox" />
+                            <span>Show "Remove from Next Up"</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            Offers the entry on Next Up cards. Already hidden series stay hidden when this is turned off; unhide them below.
+                        </div>
+                    </div>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="verticalSection" style="margin-top:2.5em;">
+                    <h2 class="sectionTitle">Hidden from Next Up</h2>
+                    <div class="fieldDescription">Series each user has hidden from their Next Up list.</div>
+                    <div id="HomeScreenCleanupHiddenList"></div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            (function () {
+                'use strict';
+
+                var pluginId = '48774b8b-b1b2-49b0-b3f4-4ebaf867a696';
+                var fields = ['EnableScriptInjection', 'AutoUnhideOnPlayback', 'EnableContinueWatchingAction', 'EnableNextUpAction'];
+                var page = document.querySelector('#HomeScreenCleanupConfigPage');
+                var form = page.querySelector('#HomeScreenCleanupConfigForm');
+                var list = page.querySelector('#HomeScreenCleanupHiddenList');
+
+                function prop(obj, name) {
+                    if (!obj || typeof obj !== 'object') {
+                        return undefined;
+                    }
+                    var camel = name.charAt(0).toLowerCase() + name.slice(1);
+                    return obj[name] !== undefined && obj[name] !== null ? obj[name] : obj[camel];
+                }
+
+                function el(tag, className, text) {
+                    var node = tag === 'button'
+                        ? document.createElement('button', { is: 'emby-button' })
+                        : document.createElement(tag);
+                    if (tag === 'button') {
+                        node.setAttribute('is', 'emby-button');
+                        node.type = 'button';
+                    }
+                    if (className) {
+                        node.className = className;
+                    }
+                    if (text !== undefined && text !== null) {
+                        node.textContent = String(text);
+                    }
+                    return node;
+                }
+
+                function formatDate(value) {
+                    var d = new Date(value);
+                    return isNaN(d.getTime()) ? String(value || '') : d.toLocaleString();
+                }
+
+                function fail(err) {
+                    Dashboard.hideLoadingMsg();
+                    var status = err && err.status ? ' (HTTP ' + err.status + ')' : '';
+                    Dashboard.alert('Home Screen Cleanup: the request failed' + status + '.');
+                }
+
+                function clear(node) {
+                    while (node.firstChild) {
+                        node.removeChild(node.firstChild);
+                    }
+                }
+
+                function adminDelete(route) {
+                    Dashboard.showLoadingMsg();
+                    return ApiClient.ajax({ type: 'DELETE', url: ApiClient.getUrl(route) })
+                        .then(loadHidden, fail);
+                }
+
+                function renderHidden(users) {
+                    clear(list);
+                    var groups = (Array.isArray(users) ? users : []).filter(function (u) {
+                        var entries = prop(u, 'Entries');
+                        return Array.isArray(entries) && entries.length > 0;
+                    });
+
+                    if (groups.length === 0) {
+                        list.appendChild(el('p', 'fieldDescription', 'No series are hidden from Next Up.'));
+                        return;
+                    }
+
+                    groups.forEach(function (u) {
+                        var userId = String(prop(u, 'UserId') || '');
+                        var userName = prop(u, 'UserName');
+                        var label = userName ? String(userName) : '(deleted user) ' + userId;
+                        var entries = prop(u, 'Entries');
+
+                        var block = el('div', 'verticalSection');
+                        var header = el('div', 'sectionTitleContainer flex align-items-center');
+                        header.appendChild(el('h3', 'sectionTitle', label));
+
+                        var clearAll = el('button', 'raised emby-button');
+                        clearAll.appendChild(el('span', null, 'Clear all'));
+                        clearAll.style.marginLeft = '1em';
+                        clearAll.addEventListener('click', function () {
+                            if (window.confirm('Unhide all ' + entries.length + ' series for ' + label + '?')) {
+                                adminDelete('HomeScreenCleanup/Admin/Hidden/' + encodeURIComponent(userId));
+                            }
+                        });
+                        header.appendChild(clearAll);
+                        block.appendChild(header);
+
+                        var paper = el('div', 'paperList');
+                        entries.forEach(function (entry) {
+                            var seriesId = String(prop(entry, 'SeriesId') || '');
+                            var seriesName = prop(entry, 'SeriesName') || seriesId;
+
+                            var row = el('div', 'listItem');
+                            var body = el('div', 'listItemBody two-line');
+                            body.appendChild(el('div', 'listItemBodyText', seriesName));
+                            body.appendChild(el('div', 'listItemBodyText secondary', 'Hidden ' + formatDate(prop(entry, 'HiddenAtUtc'))));
+                            row.appendChild(body);
+
+                            var unhide = el('button', 'emby-button');
+                            unhide.appendChild(el('span', null, 'Unhide'));
+                            unhide.addEventListener('click', function () {
+                                adminDelete('HomeScreenCleanup/Admin/Hidden/' + encodeURIComponent(userId) + '/' + encodeURIComponent(seriesId));
+                            });
+                            row.appendChild(unhide);
+                            paper.appendChild(row);
+                        });
+                        block.appendChild(paper);
+                        list.appendChild(block);
+                    });
+                }
+
+                function loadHidden() {
+                    Dashboard.showLoadingMsg();
+                    return ApiClient.ajax({ type: 'GET', url: ApiClient.getUrl('HomeScreenCleanup/Admin/Hidden'), dataType: 'json' })
+                        .then(function (users) {
+                            renderHidden(users);
+                            Dashboard.hideLoadingMsg();
+                        }, function (err) {
+                            clear(list);
+                            list.appendChild(el('p', 'fieldDescription', 'Could not load the hidden series list.'));
+                            fail(err);
+                        });
+                }
+
+                page.addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        fields.forEach(function (name) {
+                            page.querySelector('#' + name).checked = config[name] !== false;
+                        });
+                        Dashboard.hideLoadingMsg();
+                        loadHidden();
+                    }, fail);
+                });
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        fields.forEach(function (name) {
+                            config[name] = page.querySelector('#' + name).checked;
+                        });
+                        ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
+                            Dashboard.processPluginConfigurationUpdateResult(result);
+                        }, fail);
+                    }, fail);
+                    return false;
+                });
+            })();
+        </script>
+    </div>
+</body>
+</html>

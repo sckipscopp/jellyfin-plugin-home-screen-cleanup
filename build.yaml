@@ -1,0 +1,21 @@
+---
+# Plugin metadata (jprm schema). scripts/package.sh turns this into meta.json; release.yml checks
+# that `version` equals the pushed tag (vX.Y.Z -> X.Y.Z.0). Never change `guid`.
+name: "Home Screen Cleanup"
+guid: "48774b8b-b1b2-49b0-b3f4-4ebaf867a696"
+version: "1.0.0.0"
+targetAbi: "12.2.0.0"
+framework: "net10.0"
+owner: "sckipscopp"
+overview: "Remove items from Continue Watching and series from Next Up on the home screen."
+description: >
+  Adds "Remove from Continue Watching" and "Remove from Next Up" to the "..." menu of
+  home-screen cards in the web client. Continue Watching resets the saved playback position
+  on every version of the item without changing its played state. Next Up hides the series
+  for that user on every client until an episode of it is played again.
+category: "General"
+artifacts:
+  - "Jellyfin.Plugin.HomeScreenCleanup.dll"
+changelog: >
+  Initial release: Remove from Continue Watching (resets resume position, played state
+  untouched) and Remove from Next Up (per-user hide, auto-unhide on playback).

@@ -1,0 +1,14 @@
+bin/
+obj/
+publish/
+dist/
+TestResults/
+.vs/
+.idea/
+*.user
+*.zip
+.env
+.env.*
+
+# Lock files are committed (locked-mode restore in CI).
+!**/packages.lock.json

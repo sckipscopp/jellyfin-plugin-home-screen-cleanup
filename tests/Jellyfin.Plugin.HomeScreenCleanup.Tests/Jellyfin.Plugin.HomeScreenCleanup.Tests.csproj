@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Jellyfin.Plugin.HomeScreenCleanup.Tests</RootNamespace>
+    <AssemblyName>Jellyfin.Plugin.HomeScreenCleanup.Tests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- xunit.v3 runs on Microsoft.Testing.Platform; the .NET 10 SDK no longer supports the VSTest path for it
+         (global.json opts "dotnet test" into the MTP runner). -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <!-- Test-only relaxations: xunit needs public test classes/methods (CA1515, CS1591), test names read
+         better with underscores (CA1707), and xunit forbids ConfigureAwait(false) in tests (CA2007 vs xUnit1030). -->
+    <NoWarn>$(NoWarn);CS1591;CA1515;CA1707;CA2007;CA1822;CA1861;CA2000;CA5394;CA1816;xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <!-- BaseItemDto / QueryResult / BasePluginConfiguration are needed at test runtime. -->
+    <PackageReference Include="Jellyfin.Model" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Jellyfin.Plugin.HomeScreenCleanup\Jellyfin.Plugin.HomeScreenCleanup.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\build.yaml" Link="build.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

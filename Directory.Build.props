@@ -1,0 +1,50 @@
+<Project>
+  <!-- Shared build settings for every project in the repo. PackageReferences live in each csproj;
+       versions live in Directory.Packages.props (Central Package Management). -->
+
+  <PropertyGroup Label="Language">
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analysis">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Reproducibility">
+    <Deterministic>true</Deterministic>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Supply chain">
+    <!-- NuGet has no restore-time package-age gate. Controls instead: CPM exact versions,
+         committed packages.lock.json, locked-mode restore in CI, nuget.org-only source mapping,
+         NuGet audit on every restore, Dependabot cooldown. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CI)' == 'true'" Label="CI">
+    <RestoreLockedMode>true</RestoreLockedMode>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Identity">
+    <!-- Release builds pass -p:Version=X.Y.Z.0; local builds stay 0.0.0.0. -->
+    <Version>0.0.0.0</Version>
+    <Company>sckipscopp</Company>
+    <Authors>sckipscopp</Authors>
+    <Copyright>Copyright (C) sckipscopp. Licensed under GPL-3.0-only.</Copyright>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/sckipscopp/jellyfin-plugin-home-screen-cleanup</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+</Project>
