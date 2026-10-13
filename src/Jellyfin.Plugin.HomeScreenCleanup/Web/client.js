@@ -87,6 +87,8 @@
   let pollTimer = 0;
   let pollStart = 0;
   let pollDelay = POLL_START_MS;
+  let homeObserved = false;
+  let prefetchDone = false;
   let prefsTimer = 0;
   let scanQueued = false;
 
@@ -289,8 +291,14 @@
     const tick = guard('poll', function () {
       pollTimer = 0;
       scanContainers();
-      if (currentUserId()) {
+      const ready = !!currentUserId();
+      if (ready && !prefetchDone) {
+        prefetchDone = true;
         prefetch(false);
+      }
+      // Keep polling until the home rows exist and are observed: on a fresh load they render after
+      // ApiClient is ready, and the cache filter must be attached before their first fetch resolves.
+      if (ready && homeObserved) {
         return;
       }
       if (Date.now() - pollStart >= POLL_GIVE_UP_MS) {
@@ -549,6 +557,7 @@
     try {
       document.querySelectorAll('.homeSectionsContainer').forEach(observeHome);
       document.querySelectorAll('.homeSectionsContainer .itemsContainer').forEach(wrapContainer);
+      homeObserved = document.querySelector('.homeSectionsContainer') !== null;
     } catch (err) {
       degrade('wrap', err);
     }
@@ -858,9 +867,8 @@
     scanContainers();
     if (currentUserId()) {
       prefetch(true);
-    } else {
-      armPoll();
     }
+    armPoll();
   }
 
   function onSettingsChange() {

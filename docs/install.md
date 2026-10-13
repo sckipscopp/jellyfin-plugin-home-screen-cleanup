@@ -17,7 +17,7 @@ $h    = @{ Authorization = 'MediaBrowser Client="runbook", Device="pc", DeviceId
 | Item | Value |
 |---|---|
 | Repository URL | `https://raw.githubusercontent.com/sckipscopp/jellyfin-plugin-home-screen-cleanup/main/manifest.json` |
-| Install folder | `C:\ProgramData\Jellyfin\Server\plugins\Home Screen Cleanup_1.0.2.0` |
+| Install folder | `C:\ProgramData\Jellyfin\Server\plugins\Home Screen Cleanup_1.0.3.0` |
 | Data folder (hidden list) | `C:\ProgramData\Jellyfin\Server\plugins\Jellyfin.Plugin.HomeScreenCleanup\hidden-series.json` |
 | Config file | `C:\ProgramData\Jellyfin\Server\plugins\configurations\Jellyfin.Plugin.HomeScreenCleanup.xml` |
 | Downtime | One server restart (drops active streams). |
@@ -28,11 +28,11 @@ $h    = @{ Authorization = 'MediaBrowser Client="runbook", Device="pc", DeviceId
 
 1. Dashboard → **Plugins** → **Repositories** → **+** → name `Home Screen Cleanup`, URL from the table.
    Raw GitHub is cached ~5 min; a release published moments ago may not show yet.
-2. **Catalog** → *Home Screen Cleanup* → **Install** (version `1.0.2.0`).
+2. **Catalog** → *Home Screen Cleanup* → **Install** (version `1.0.3.0`).
 3. Restart the server (Dashboard → **Restart**).
 4. Optional: on the plugin's card, turn off auto-update so updates are deliberate.
 
-**Verify:** Dashboard → Plugins shows *Home Screen Cleanup 1.0.2.0* as **Active**, or
+**Verify:** Dashboard → Plugins shows *Home Screen Cleanup 1.0.3.0* as **Active**, or
 `Invoke-RestMethod "$base/Plugins" -Headers $h | ? Name -eq 'Home Screen Cleanup' | select Version, Status`.
 `NotSupported` = ABI / type-load problem (wrong server version); `Malfunctioned` = DI, constructor
 or guid problem — read the log (Phase 3, step 6) and roll back (Phase 4).
@@ -79,7 +79,7 @@ $r.Headers['Content-Encoding']                                # empty
 
 ```powershell
 Stop-Service JellyfinServer
-Remove-Item -LiteralPath 'C:\ProgramData\Jellyfin\Server\plugins\Home Screen Cleanup_1.0.2.0' -Recurse
+Remove-Item -LiteralPath 'C:\ProgramData\Jellyfin\Server\plugins\Home Screen Cleanup_1.0.3.0' -Recurse
 Start-Service JellyfinServer
 ```
 
@@ -90,12 +90,12 @@ discard all hidden series. Playback positions that were reset are not restored.
 
 ## Manual install (fallback when the catalog is unavailable)
 
-1. From the GitHub release `v1.0.2` download `home-screen-cleanup_1.0.2.0.zip` and
-   `home-screen-cleanup_1.0.2.0.zip.sha256`.
+1. From the GitHub release `v1.0.3` download `home-screen-cleanup_1.0.3.0.zip` and
+   `home-screen-cleanup_1.0.3.0.zip.sha256`.
 2. Verify the hash — stop if it differs:
 
    ```powershell
-   $zip  = '.\home-screen-cleanup_1.0.2.0.zip'
+   $zip  = '.\home-screen-cleanup_1.0.3.0.zip'
    $want = (Get-Content "$zip.sha256").Split(' ')[0]
    (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() -eq $want   # must be True
    ```
@@ -105,7 +105,7 @@ discard all hidden series. Playback positions that were reset are not restored.
    ```powershell
    Unblock-File $zip
    Stop-Service JellyfinServer
-   Expand-Archive $zip -DestinationPath 'C:\ProgramData\Jellyfin\Server\plugins\Home Screen Cleanup_1.0.2.0'
+   Expand-Archive $zip -DestinationPath 'C:\ProgramData\Jellyfin\Server\plugins\Home Screen Cleanup_1.0.3.0'
    Start-Service JellyfinServer
    ```
 

@@ -4,6 +4,10 @@ All notable changes to this plugin. Versions follow the Jellyfin plugin scheme `
 (git tag `vX.Y.Z`). Before tagging, replace `unreleased` with the release date (`YYYY-MM-DD`);
 the release workflow refuses a section still marked unreleased.
 
+## 1.0.3.0 — 2026-10-13
+
+- Fix: after a page reload the removed card could reappear for up to a minute. The web client re-renders its 60-second query cache before the plugin had attached its cache filter, because the attach only ran before the home rows existed. The script now keeps scanning until the home rows are present and observed.
+
 ## 1.0.2.0 — 2026-10-13
 
 - Fix: the context-menu entry was never inserted because the entry button was created with a `createElement` options object, which jellyfin-web's custom-elements polyfill rejects; the failure also disabled the menu hook for the rest of the page load. The entry is now a plain button and an injection failure only skips that one menu.
