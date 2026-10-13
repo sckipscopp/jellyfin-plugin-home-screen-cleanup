@@ -4,7 +4,9 @@ All notable changes to this plugin. Versions follow the Jellyfin plugin scheme `
 (git tag `vX.Y.Z`). Before tagging, replace `unreleased` with the release date (`YYYY-MM-DD`);
 the release workflow refuses a section still marked unreleased.
 
-## 1.0.0.0 — 2026-10-13
+## 1.0.1.0 — 2026-10-13
+
+_1.0.0.0 was tagged but never published; the repository was recreated with clean history and the first public release is 1.0.1.0._
 
 - **Remove from Continue Watching**: new entry in the "..." menu of Continue Watching cards. Resets
   the saved playback position of the item and every alternate version; played state, play count
