@@ -67,7 +67,7 @@ public sealed class HomeScreenCleanupController : ControllerBase
     }
 
     /// <summary>
-    /// Removes an item from Continue Watching by zeroing the resume position of it and all its versions.
+    /// Removes an item from Continue Watching by marking it and all its versions played (resume position reset).
     /// </summary>
     /// <param name="itemId">The item id (any version).</param>
     /// <param name="userId">Optional target user (elevated callers only).</param>

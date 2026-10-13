@@ -4,6 +4,10 @@ All notable changes to this plugin. Versions follow the Jellyfin plugin scheme `
 (git tag `vX.Y.Z`). Before tagging, replace `unreleased` with the release date (`YYYY-MM-DD`);
 the release workflow refuses a section still marked unreleased.
 
+## 1.0.4.0 — 2026-10-13
+
+- Change: **Remove from Continue Watching now marks the item (every version) as played** instead of only clearing the resume position. Jellyfin's Next Up offers the first unplayed episode after the highest played one, so a merely reset episode came back in Next Up once the following episode was started. "Mark unplayed" in any client reverses it.
+
 ## 1.0.3.0 — 2026-10-13
 
 - Fix: after a page reload the removed card could reappear for up to a minute. The web client re-renders its 60-second query cache before the plugin had attached its cache filter, because the attach only ran before the home rows existed. The script now keeps scanning until the home rows are present and observed.

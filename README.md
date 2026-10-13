@@ -4,13 +4,13 @@ Adds two entries to the **"..."** menu of cards on the Jellyfin web home screen:
 
 | Row | Menu entry | What it does |
 |---|---|---|
-| Continue Watching | **Remove from Continue Watching** | Resets the saved playback position to 0 on the item **and every alternate version** (e.g. 1080p + 4K). `Played`, play count and last-played date are **not** changed, so the item stays watched/unwatched exactly as it was. |
+| Continue Watching | **Remove from Continue Watching** | Marks the item **and every alternate version** (e.g. 1080p + 4K) as played, which also clears the resume position. The item leaves Continue Watching and, for an episode, Next Up moves on to the following episode instead of offering it again. |
 | Next Up | **Remove from Next Up** | Hides the series from Next Up **for your user only**. The filter runs on the server, so it applies to **every client** (web, mobile, TV apps). Playing any episode of the series un-hides it automatically. |
 
-Side effect to know about: a TV episode removed from Continue Watching has no resume position
-anymore, so it can now show up in **Next Up** (the web client asks Next Up to skip resumable
-episodes; after the reset it no longer is one). Use "Remove from Next Up" if you want it gone
-from both rows.
+Why "mark played" rather than just clearing the position: Jellyfin's Next Up offers the first
+unplayed episode after the highest played one, so an episode that was merely reset would come
+back in Next Up. Marking it played is the only stock state that keeps it out of both rows. The
+item shows as watched afterwards; "Mark unplayed" in any client reverses it.
 
 Tested with Jellyfin server **12.2.0** / jellyfin-web **12.2**.
 
@@ -108,8 +108,8 @@ Report vulnerabilities privately — see [SECURITY.md](SECURITY.md).
 
 ## Uninstall
 
-Dashboard → Plugins → *Home Screen Cleanup* → **Uninstall**, then restart the server. Reset
-playback positions stay reset. The hidden list stays in
+Dashboard → Plugins → *Home Screen Cleanup* → **Uninstall**, then restart the server. Items
+marked played stay played. The hidden list stays in
 `plugins/Jellyfin.Plugin.HomeScreenCleanup/` but is no longer applied; delete that folder to remove
 it completely.
 

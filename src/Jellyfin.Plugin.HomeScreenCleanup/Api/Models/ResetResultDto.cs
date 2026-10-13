@@ -19,7 +19,7 @@ public sealed class ResetResultDto
     public Guid ItemId { get; set; }
 
     /// <summary>
-    /// Gets or sets the ids of every version whose resume position was zeroed.
+    /// Gets or sets the ids of every version that was marked played (resume position reset).
     /// </summary>
     public IReadOnlyList<Guid> ResetItemIds { get; set; } = [];
 

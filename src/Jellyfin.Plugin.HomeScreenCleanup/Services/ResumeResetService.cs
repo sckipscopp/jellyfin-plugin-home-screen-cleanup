@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Threading;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 using JellyfinUser = Jellyfin.Database.Implementations.Entities.User;
 
 namespace Jellyfin.Plugin.HomeScreenCleanup.Services;
 
 /// <summary>
-/// Removes an item from Continue Watching by zeroing the resume position of the item and every
-/// alternate version. Played, PlayCount and LastPlayedDate are left untouched.
+/// Removes an item from Continue Watching by marking the item and every alternate version played
+/// (which also zeroes the resume position), so it neither resumes nor surfaces in Next Up.
 /// </summary>
 public sealed class ResumeResetService
 {
@@ -36,12 +35,12 @@ public sealed class ResumeResetService
     }
 
     /// <summary>
-    /// Zeroes the resume position of <paramref name="video"/> and all of its versions for <paramref name="user"/>.
+    /// Marks <paramref name="video"/> and all of its versions played for <paramref name="user"/>, resetting their resume position.
     /// </summary>
     /// <param name="user">The user.</param>
     /// <param name="video">The requested video (any version).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>Ids of the versions whose position was reset (empty when nothing had progress).</returns>
+    /// <returns>Ids of the versions that were marked played (empty when every version already was, with no progress).</returns>
     public IReadOnlyList<Guid> ResetProgress(JellyfinUser user, Video video, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
@@ -53,13 +52,14 @@ public sealed class ResumeResetService
             cancellationToken.ThrowIfCancellationRequested();
 
             var data = _userDataManager.GetUserData(user, version);
-            if (data is null || data.PlaybackPositionTicks <= 0)
+            if (data is { Played: true, PlaybackPositionTicks: <= 0 })
             {
                 continue;
             }
 
-            data.PlaybackPositionTicks = 0;
-            _userDataManager.SaveUserData(user, version, data, UserDataSaveReason.UpdateUserData, cancellationToken);
+            // BaseItem.MarkPlayed saves the user data itself (reason TogglePlayed), which also triggers the
+            // UserDataChanged websocket push that refreshes the web client's home rows.
+            version.MarkPlayed(user, DateTime.UtcNow, resetPosition: true);
             reset.Add(version.Id);
         }
 

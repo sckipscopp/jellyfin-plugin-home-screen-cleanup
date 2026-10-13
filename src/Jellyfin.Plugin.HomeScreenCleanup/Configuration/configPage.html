@@ -13,9 +13,9 @@
                     <h2 class="sectionTitle">Home Screen Cleanup</h2>
                     <p class="fieldDescription">
                         Adds "Remove from Continue Watching" and "Remove from Next Up" to the "..." menu of cards in those two
-                        home-screen rows of the web client. Removing from Continue Watching resets the saved playback position
-                        of the item (and all of its versions) to the start; its played state, play count and last-played date
-                        are not changed. Because of that, a reset episode can afterwards appear in Next Up. Removing from Next Up
+                        home-screen rows of the web client. Removing from Continue Watching marks the item (and all of its
+                        versions) as played, which also clears its resume position, so an episode does not come back in Next Up;
+                        "Mark unplayed" in any client reverses it. Removing from Next Up
                         hides the whole series from that user's Next Up list on every client until it is unhidden here or, if
                         enabled, until the user plays an episode of that series again.
                     </p>
@@ -47,7 +47,7 @@
                             <span>Show "Remove from Continue Watching"</span>
                         </label>
                         <div class="fieldDescription checkboxFieldDescription">
-                            Offers the entry on Continue Watching cards. It resets the playback position to zero; the item may then show up in Next Up.
+                            Offers the entry on Continue Watching cards. It marks the item played (and clears its resume position).
                         </div>
                     </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">

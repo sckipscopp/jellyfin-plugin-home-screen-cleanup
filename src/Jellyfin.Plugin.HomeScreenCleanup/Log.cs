@@ -63,8 +63,8 @@ internal static partial class Log
     /// <param name="logger">The logger.</param>
     /// <param name="itemId">The requested item id.</param>
     /// <param name="userId">The user id.</param>
-    /// <param name="count">Number of versions whose position was reset.</param>
-    [LoggerMessage(EventId = 20, Level = LogLevel.Information, Message = "HomeScreenCleanup Reset resume position of item {ItemId} for user {UserId}: {Count} version(s) changed")]
+    /// <param name="count">Number of versions that were marked played.</param>
+    [LoggerMessage(EventId = 20, Level = LogLevel.Information, Message = "HomeScreenCleanup Marked item {ItemId} played for user {UserId}: {Count} version(s) changed")]
     public static partial void ResumeReset(this ILogger logger, Guid itemId, Guid userId, int count);
 
     /// <summary>Logs that the Next Up filter failed and the original result was kept.</summary>
