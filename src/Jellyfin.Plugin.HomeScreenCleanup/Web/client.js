@@ -88,6 +88,7 @@
   let pollStart = 0;
   let pollDelay = POLL_START_MS;
   let homeObserved = false;
+  let nextUpPrefs = { rewatch: false, maxDays: 365 };
   let prefetchDone = false;
   let prefsTimer = 0;
   let scanQueued = false;
@@ -241,6 +242,11 @@
         return;
       }
       const custom = prop(res, 'CustomPrefs') || {};
+      const maxDays = parseInt(custom.maxDaysForNextUp, 10);
+      nextUpPrefs = {
+        rewatch: String(custom.enableRewatchingInNextUp ?? 'false').toLowerCase() === 'true',
+        maxDays: Number.isFinite(maxDays) && maxDays > 0 ? maxDays : 365
+      };
       const sections = [];
       for (let i = 0; i < DEFAULT_SECTIONS.length; i++) {
         let value = custom['homesection' + i] || DEFAULT_SECTIONS[i];
@@ -513,13 +519,57 @@
     }
   }
 
+  // Same requests the web client's home rows make (resume.ts / nextUp.ts in jellyfin-web 12.2), sent
+  // straight to the server so a row can be re-rendered from server truth while the 60 s query cache is stale.
+  function fetchFresh(kind) {
+    const userId = currentUserId();
+    if (!userId) {
+      return Promise.reject(new Error('no user'));
+    }
+    let route;
+    let params;
+    if (kind === KIND_RESUME) {
+      route = 'UserItems/Resume';
+      params = {
+        userId: userId, limit: 12, fields: 'PrimaryImageAspectRatio', imageTypeLimit: 1,
+        enableImageTypes: 'Primary,Backdrop,Thumb', enableTotalRecordCount: false, mediaTypes: 'Video'
+      };
+    } else {
+      const cutoff = new Date(Date.now() - nextUpPrefs.maxDays * 86400000).toISOString().slice(0, 10);
+      route = 'Shows/NextUp';
+      params = {
+        userId: userId, limit: 24, fields: 'PrimaryImageAspectRatio,DateCreated,Path,MediaSourceCount',
+        imageTypeLimit: 1, enableImageTypes: 'Primary,Backdrop,Thumb', enableTotalRecordCount: false,
+        enableResumable: false, enableRewatching: nextUpPrefs.rewatch, nextUpDateCutoff: cutoff
+      };
+    }
+    return ajax({ type: 'GET', url: url(route, params), dataType: 'json' });
+  }
+
   function makeWrapper(ic, inner) {
     return function hscFetchData() {
-      const result = inner.apply(this, arguments);
-      if (result && typeof result.then === 'function') {
-        return result.then(function (res) { return filterResult(ic, res); });
+      const self = this;
+      const args = arguments;
+      const cached = function () {
+        const result = inner.apply(self, args);
+        if (result && typeof result.then === 'function') {
+          return result.then(function (res) { return filterResult(ic, res); });
+        }
+        return filterResult(ic, result);
+      };
+      try {
+        // Within the removed-id TTL the cached row is known to be stale: ask the server instead.
+        const kind = sectionKind(ic.closest?.('.verticalSection'), null);
+        if (kind && removedIds(scopeKey(null), kind).size) {
+          return fetchFresh(kind).then(
+            function (res) { return filterResult(ic, res); },
+            function () { return cached(); }
+          );
+        }
+      } catch (_) {
+        // fall through to the cached path
       }
-      return filterResult(ic, result);
+      return cached();
     };
   }
 
