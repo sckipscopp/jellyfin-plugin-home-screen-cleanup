@@ -2,11 +2,19 @@
   {
     "guid": "48774b8b-b1b2-49b0-b3f4-4ebaf867a696",
     "name": "Home Screen Cleanup",
-    "description": "Adds \"Remove from Continue Watching\" and \"Remove from Next Up\" to the \"...\" menu of home-screen cards in the web client. Continue Watching resets the saved playback position on every version of the item without changing its played state. Next Up hides the series for that user on every client until an episode of it is played again.\n",
+    "description": "Adds \"Remove from Continue Watching\" and \"Remove from Next Up\" to the \"...\" menu of home-screen cards in the web client. Continue Watching marks the item (every version) played, which clears its resume position and keeps it out of Next Up. Next Up hides the series for that user on every client until an episode of it is played again.\n",
     "overview": "Remove items from Continue Watching and series from Next Up on the home screen.",
     "owner": "sckipscopp",
     "category": "General",
     "versions": [
+      {
+        "version": "1.0.4.0",
+        "changelog": "Remove from Continue Watching now marks the item played (a reset-only episode came back in Next Up). Remove from Next Up: per-user hide, auto-unhide on playback.\n",
+        "targetAbi": "12.2.0.0",
+        "sourceUrl": "https://github.com/sckipscopp/jellyfin-plugin-home-screen-cleanup/releases/download/v1.0.4/home-screen-cleanup_1.0.4.0.zip",
+        "checksum": "d2e015b286131e0694f2f4a23c22931c",
+        "timestamp": "2026-10-13T15:53:05Z"
+      },
       {
         "version": "1.0.3.0",
         "changelog": "Initial release: Remove from Continue Watching (resets resume position, played state untouched) and Remove from Next Up (per-user hide, auto-unhide on playback).\n",
