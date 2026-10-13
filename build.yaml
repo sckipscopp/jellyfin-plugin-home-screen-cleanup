@@ -3,7 +3,7 @@
 # that `version` equals the pushed tag (vX.Y.Z -> X.Y.Z.0). Never change `guid`.
 name: "Home Screen Cleanup"
 guid: "48774b8b-b1b2-49b0-b3f4-4ebaf867a696"
-version: "1.0.1.0"
+version: "1.0.2.0"
 targetAbi: "12.2.0.0"
 framework: "net10.0"
 owner: "sckipscopp"

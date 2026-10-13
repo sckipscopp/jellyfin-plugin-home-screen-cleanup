@@ -581,7 +581,7 @@
 
   function notePending(origin) {
     pending = null;
-    if (isTv() || !origin?.closest) {
+    if (!origin?.closest) {
       return;
     }
     const card = origin.closest('.card[data-id]');
@@ -641,7 +641,7 @@
         const p = pending;
         pending = null;
         if (acceptSheet(sheet, p)) {
-          inject(sheet, p);
+          guard('inject', function () { inject(sheet, p); })();
         }
         return;
       }
@@ -652,7 +652,7 @@
     if (!p || Date.now() - p.ts > PENDING_WINDOW_MS || !p.card.isConnected) {
       return false;
     }
-    if (isTv() || !kindEnabled(p.kind)) {
+    if (!kindEnabled(p.kind)) {
       return false;
     }
     const hasPlayback = Array.prototype.some.call(
@@ -680,7 +680,8 @@
     const sibling = anchor || items[0] || null;
     const spec = ENTRY[p.kind];
 
-    const btn = document.createElement('button', { is: 'emby-button' });
+    // Plain createElement: jellyfin-web's v0 registerElement polyfill wraps createElement and rejects an options object.
+    const btn = document.createElement('button');
     btn.setAttribute('is', 'emby-button');
     btn.type = 'button';
     btn.className = sibling?.className || 'listItem listItem-button actionSheetMenuItem';
